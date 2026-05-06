@@ -876,6 +876,8 @@
       .evidence-item { grid-template-columns: 1fr; }
     }
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
   <div class="shell">
@@ -1214,7 +1216,8 @@
             <p>${escapeHTML(p.cta)}：${escapeHTML(contact)}</p>
             <div class="actions export-actions">
               <button class="primary" type="button" id="copyShareBtn">复制分享文案</button>
-              <button class="secondary" type="button" id="downloadBtn">下载当前页面</button>
+              <button class="secondary" type="button" id="downloadPdfBtn">下载 PDF</button>
+              <button class="secondary" type="button" id="downloadJpgBtn">下载 JPG</button>
             </div>
           </div>
           <div class="gp-footer">由作品名片生成 · 把经历转化为可信能力证明</div>
@@ -1318,18 +1321,51 @@
       setTimeout(() => toast.style.display = 'none', 1800);
     }
 
-    function downloadHTML() {
-      const previewNode = document.getElementById('preview').cloneNode(true);
-      previewNode.querySelectorAll('.export-actions').forEach(el => el.remove());
-      const preview = previewNode.innerHTML;
-      const html = `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"><title>我的作品集</title><style>${document.querySelector('style').innerHTML}</style></head><body><div class="shell"><section class="preview">${preview}</section></div></body></html>`;
-      const blob = new Blob([html], { type: 'text/html' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'my-portfolio.html';
-      a.click();
-      URL.revokeObjectURL(url);
+    function downloadPDF() {
+      const previewEl = document.getElementById('preview');
+      html2canvas(previewEl, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#eef0ed',
+        logging: false
+      }).then(canvas => {
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+        let heightLeft = pdfHeight;
+        let position = 0;
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, pdfHeight);
+        heightLeft -= pageHeight;
+        while (heightLeft > 0) {
+          position = heightLeft - pdfHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, pdfHeight);
+          heightLeft -= pageHeight;
+        }
+        pdf.save('my-portfolio.pdf');
+      }).catch(err => {
+        showToast('PDF 生成失败，请重试');
+      });
+    }
+
+    function downloadJPG() {
+      const previewEl = document.getElementById('preview');
+      html2canvas(previewEl, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#eef0ed',
+        logging: false
+      }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'my-portfolio.jpg';
+        link.href = canvas.toDataURL('image/jpeg', 0.92);
+        link.click();
+      }).catch(err => {
+        showToast('JPG 生成失败，请重试');
+      });
     }
 
     function collectDraft() {
@@ -1391,7 +1427,8 @@
     });
     document.getElementById('preview').addEventListener('click', event => {
       if (event.target.id === 'copyShareBtn') copyText(currentShareCopy);
-      if (event.target.id === 'downloadBtn') downloadHTML();
+      if (event.target.id === 'downloadPdfBtn') downloadPDF();
+      if (event.target.id === 'downloadJpgBtn') downloadJPG();
     });
 
     addWork();
