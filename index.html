@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>作品名片｜个人能力证明工具</title>
+  <style>
+    :root {
+      --bg: #eef0ed;
+      --card: #ffffff;
+      --text: #171717;
+      --muted: #666666;
+      --line: #e8e8e3;
+      --primary: #111827;
+      --primary-2: #374151;
+      --accent: #f0efe9;
+      --success: #0f766e;
+      --warning: #b45309;
+      --radius: 18px;
+      --shadow: 0 16px 50px rgba(0,0,0,0.08);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    a { color: inherit; }
+
+    .shell {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: rgba(238,240,237,0.88);
+      backdrop-filter: blur(18px);
+      border: 1px solid rgba(232,232,227,0.9);
+      border-radius: 16px;
+      padding: 12px 14px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.05);
+    }
+
+    .brand {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 11px;
+      background: var(--primary);
+      color: white;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+    }
+
+    .pill {
+      padding: 8px 12px;
+      background: var(--accent);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .app-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr 0.86fr;
+      gap: 28px;
+      align-items: stretch;
+      margin-bottom: 34px;
+    }
+
+    .hero-card, .panel, .preview {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-card {
+      padding: 44px;
+    }
+
+    h1 {
+      margin: 0 0 16px;
+      font-size: clamp(36px, 6vw, 68px);
+      line-height: 0.98;
+      letter-spacing: -0.065em;
+      overflow-wrap: anywhere;
+    }
+
+    .app-brief {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 18px;
+      align-items: end;
+      padding: 18px 4px 16px;
+    }
+
+    .app-brief h1 {
+      font-size: clamp(28px, 3vw, 42px);
+      letter-spacing: -0.045em;
+      line-height: 1.05;
+      margin-bottom: 8px;
+    }
+
+    .app-brief .lead {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .status-strip {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .status-chip {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.74);
+      border-radius: 999px;
+      padding: 8px 11px;
+      color: var(--primary-2);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .lead {
+      color: var(--muted);
+      max-width: 680px;
+      font-size: 18px;
+      margin: 0 0 24px;
+    }
+
+    .cta-row { display: flex; gap: 12px; flex-wrap: wrap; }
+
+    button, .btn {
+      appearance: none;
+      -webkit-appearance: none;
+      border: 0;
+      border-radius: 12px;
+      padding: 13px 16px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s ease, opacity 0.15s ease, background 0.15s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    button:hover, .btn:hover { transform: translateY(-1px); }
+    .primary { background: var(--primary); color: white; }
+    .secondary { background: var(--accent); color: var(--text); border: 1px solid var(--line); }
+    .ghost { background: transparent; color: var(--muted); border: 1px solid var(--line); }
+
+    .mini-preview {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 360px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .mini-preview:before {
+      content: "";
+      position: absolute;
+      inset: -80px -80px auto auto;
+      width: 220px;
+      height: 220px;
+      background: #f5e7cf;
+      border-radius: 50%;
+      filter: blur(2px);
+      opacity: 0.8;
+    }
+
+    .mini-top { position: relative; }
+    .avatar {
+      width: 54px;
+      height: 54px;
+      border-radius: 17px;
+      background: var(--primary);
+      color: white;
+      display: grid;
+      place-items: center;
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 18px;
+    }
+
+    .mini-title { font-size: 24px; font-weight: 850; letter-spacing: -0.04em; margin-bottom: 6px; }
+    .mini-sub { color: var(--muted); }
+
+    .mini-stack { display: grid; gap: 10px; position: relative; }
+    .mini-item {
+      padding: 13px;
+      background: rgba(255,255,255,0.8);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      font-size: 14px;
+    }
+    .mini-item strong { display: block; margin-bottom: 2px; }
+    .mini-item span { color: var(--muted); }
+
+    .section-title {
+      margin: 24px 0 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+    }
+    .section-title h2 { margin: 0; font-size: 26px; letter-spacing: -0.04em; }
+    .section-title p { margin: 0; color: var(--muted); font-size: 14px; }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(340px, 430px) minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .panel {
+      padding: 18px;
+      max-height: calc(100vh - 154px);
+      overflow: auto;
+    }
+    .panel h3 { margin: 0 0 12px; font-size: 18px; }
+
+    .panel-kicker {
+      margin: 0 0 4px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      margin: 14px 0 7px;
+      font-weight: 700;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 13px;
+      background: #fbfbfa;
+      color: var(--text);
+      font: inherit;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    textarea { min-height: 92px; resize: vertical; }
+    input:focus, textarea:focus, select:focus { border-color: #b6b6ae; background: white; }
+
+    .work-input {
+      border: 1px dashed #d8d8cf;
+      background: #fcfcfb;
+      padding: 14px;
+      border-radius: 15px;
+      margin-top: 12px;
+    }
+
+    .work-input-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+
+    .work-input-head strong {
+      font-size: 14px;
+    }
+
+    .remove-work {
+      padding: 7px 10px;
+      border-radius: 10px;
+      font-size: 13px;
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      color: #9a3412;
+    }
+
+    details.advanced-fields {
+      margin-top: 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      padding: 10px 12px 14px;
+    }
+
+    details.advanced-fields summary {
+      cursor: pointer;
+      color: var(--primary-2);
+      font-weight: 800;
+      font-size: 14px;
+    }
+
+    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+
+    .preview-shell {
+      background: #dedfd9;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      min-height: calc(100vh - 154px);
+      padding: 12px;
+      position: sticky;
+      top: 88px;
+    }
+
+    .preview-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 3px 4px 12px;
+      color: var(--primary-2);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .preview-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .preview-dots span {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: #c8cac3;
+    }
+
+    .preview {
+      padding: 24px;
+      min-height: calc(100vh - 220px);
+      max-height: calc(100vh - 220px);
+      overflow: auto;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: none;
+    }
+
+    .generated-page {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    .gp-hero {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 28px;
+      align-items: center;
+      padding: 34px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .gp-hero:before {
+      content: "";
+      position: absolute;
+      top: -60px;
+      right: -60px;
+      width: 180px;
+      height: 180px;
+      background: #f5e7cf;
+      border-radius: 999px;
+      opacity: 0.6;
+    }
+
+    .gp-avatar {
+      width: 92px;
+      height: 92px;
+      border-radius: 26px;
+      background: var(--primary);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 42px;
+      font-weight: 900;
+      position: relative;
+      z-index: 1;
+    }
+
+    .gp-hero-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .gp-hero h2 {
+      margin: 0 0 6px;
+      font-size: clamp(30px, 4vw, 42px);
+      line-height: 1;
+      letter-spacing: -0.045em;
+    }
+
+    .gp-identity {
+      color: var(--primary-2);
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .gp-bio {
+      color: var(--muted);
+      max-width: 620px;
+      margin-bottom: 14px;
+    }
+
+    .gp-contact {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 16px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: var(--accent);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .gp-section {
+      margin-bottom: 28px;
+    }
+
+    .gp-section-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .gp-section-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+
+    .gp-section-title {
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+    }
+
+    .gp-items {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .gp-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--card);
+      text-decoration: none;
+      min-width: 0;
+      transition: transform 0.16s ease, border 0.16s ease, box-shadow 0.16s ease;
+    }
+
+    .gp-item:hover {
+      border-color: var(--primary);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+      transform: translateY(-1px);
+    }
+
+    .gp-item-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+
+    .gp-item-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .gp-item-name {
+      font-size: 15px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .gp-item-desc {
+      color: var(--muted);
+      font-size: 13px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    .gp-link-tag {
+      display: inline-flex;
+      margin-top: 7px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: var(--accent);
+      color: var(--primary-2);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .gp-arrow {
+      color: #999;
+      font-weight: 900;
+    }
+
+    .gp-score {
+      padding: 18px;
+      border-radius: 16px;
+      background: #fefce8;
+      border: 1px solid #fde68a;
+      margin: 28px 0;
+    }
+
+    .gp-score strong {
+      color: var(--warning);
+    }
+
+    .gp-score ul {
+      margin: 8px 0 0 20px;
+      padding: 0;
+      color: #71480b;
+    }
+
+    .gp-cta {
+      text-align: center;
+      padding: 34px 22px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      margin-top: 32px;
+    }
+
+    .gp-cta h3 {
+      margin: 0 0 8px;
+      font-size: 20px;
+    }
+
+    .gp-cta p {
+      margin: 0 0 18px;
+      color: var(--muted);
+    }
+
+    .gp-footer {
+      text-align: center;
+      color: #999;
+      font-size: 13px;
+      padding: 28px 0 6px;
+    }
+    .portfolio-head {
+      padding: 28px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, #f8f6ef 0%, #ffffff 70%);
+      border: 1px solid var(--line);
+      margin-bottom: 22px;
+    }
+
+    .portfolio-head h2 {
+      font-size: clamp(30px, 4vw, 48px);
+      margin: 0 0 10px;
+      letter-spacing: -0.055em;
+      line-height: 1;
+    }
+
+    .positioning {
+      font-size: 19px;
+      color: var(--primary-2);
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .intro { color: var(--muted); max-width: 720px; }
+
+    .tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 18px; }
+    .tag {
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: white;
+      border: 1px solid var(--line);
+      font-size: 13px;
+      color: var(--primary-2);
+      font-weight: 700;
+    }
+
+    .block { margin-top: 26px; }
+    .block h3 { margin: 0 0 13px; font-size: 20px; letter-spacing: -0.025em; }
+
+    .works { display: grid; gap: 13px; }
+    .work-card {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fff;
+    }
+    .work-card h4 { margin: 0 0 6px; font-size: 18px; }
+    .work-card p { margin: 7px 0; color: var(--muted); }
+    .meta { color: var(--muted); font-size: 13px; }
+    .proof { margin-top: 12px; padding: 12px; border-radius: 12px; background: #f9fafb; border: 1px solid #edf0f3; }
+    .proof strong { display: block; margin-bottom: 5px; }
+    .invalid-link { color: #b91c1c; font-size: 13px; margin-top: 8px; }
+
+    .evidence-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .evidence-item {
+      display: grid;
+      grid-template-columns: 72px 1fr;
+      gap: 10px;
+      padding: 10px 12px;
+      border: 1px solid #edf0f3;
+      border-radius: 12px;
+      background: #fbfbfa;
+      font-size: 14px;
+    }
+
+    .evidence-item strong {
+      color: var(--primary-2);
+    }
+
+    .score-card {
+      padding: 16px;
+      border-radius: 15px;
+      background: #fefce8;
+      border: 1px solid #fde68a;
+      margin-top: 18px;
+    }
+    .score-card strong { color: var(--warning); }
+    .score-card ul { margin: 8px 0 0 20px; padding: 0; color: #71480b; }
+
+    .empty {
+      display: grid;
+      place-items: center;
+      text-align: center;
+      min-height: 500px;
+      color: var(--muted);
+      border: 1px dashed var(--line);
+      border-radius: 18px;
+      padding: 30px;
+      background: #fbfbfa;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%);
+      background: var(--primary);
+      color: #fff;
+      padding: 12px 16px;
+      border-radius: 999px;
+      font-size: 14px;
+      display: none;
+      box-shadow: var(--shadow);
+      z-index: 10;
+    }
+
+    @media (max-width: 900px) {
+      body {
+        background: #eef0ed;
+        padding-bottom: max(18px, env(safe-area-inset-bottom));
+      }
+      .shell {
+        padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) 18px max(12px, env(safe-area-inset-left));
+      }
+      .app-header {
+        border: 0;
+        border-radius: 24px;
+        padding: 12px;
+        background: rgba(255,255,255,0.82);
+        box-shadow: 0 12px 34px rgba(0,0,0,0.08);
+      }
+      .logo {
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+      }
+      .brand {
+        font-size: 18px;
+      }
+      .pill {
+        padding: 8px 12px;
+        background: var(--accent);
+        border: 0;
+        color: var(--muted);
+      }
+      .app-actions #fillDemoBtn {
+        background: var(--accent);
+        color: var(--text);
+        border: 1px solid var(--line);
+        box-shadow: none;
+      }
+      .app-brief, .hero, .workspace { grid-template-columns: 1fr; }
+      .app-brief { padding: 18px 2px 12px; }
+      .app-brief h1 {
+        font-size: 30px;
+        line-height: 1.12;
+        letter-spacing: -0.02em;
+      }
+      .status-strip { justify-content: flex-start; }
+      .status-chip {
+        background: rgba(255,255,255,0.82);
+        border: 0;
+        color: var(--primary-2);
+        box-shadow: inset 0 0 0 1px rgba(60,60,67,0.08);
+      }
+      .hero, .workspace, .hero-card, .panel, .preview, .preview-shell { min-width: 0; max-width: 100%; }
+      .panel {
+        max-height: none;
+        border: 0;
+        border-radius: 26px;
+        padding: 18px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+      }
+      .preview-shell {
+        position: static;
+        min-height: 0;
+        border: 0;
+        border-radius: 26px;
+        padding: 10px;
+        background: rgba(255,255,255,0.58);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+      }
+      .preview {
+        min-height: 520px;
+        max-height: none;
+        border: 0;
+        border-radius: 22px;
+        padding: 18px;
+      }
+      .hero-card { padding: 24px 18px; }
+      h1 { font-size: 28px; line-height: 1.14; letter-spacing: 0; word-break: break-all; }
+      .lead { font-size: 16px; overflow-wrap: anywhere; word-break: break-all; }
+      .two { grid-template-columns: 1fr; }
+      header { align-items: flex-start; gap: 12px; flex-direction: column; }
+      .app-actions { justify-content: flex-start; }
+      label {
+        margin-top: 16px;
+        color: #6e6e73;
+      }
+      input, textarea, select {
+        min-height: 48px;
+        border: 0;
+        border-radius: 14px;
+        background: #f9f9fb;
+        font-size: 16px;
+        box-shadow: inset 0 0 0 1px rgba(60,60,67,0.12);
+      }
+      textarea {
+        min-height: 104px;
+      }
+      button, .btn {
+        min-height: 44px;
+        border-radius: 14px;
+        font-size: 16px;
+        touch-action: manipulation;
+      }
+      .actions {
+        gap: 8px;
+      }
+      .actions button {
+        flex: 1 1 calc(50% - 8px);
+      }
+      .actions #generateBtn {
+        flex-basis: 100%;
+        order: -1;
+      }
+      .work-input {
+        border: 0;
+        border-radius: 20px;
+        background: #f9f9fb;
+        padding: 14px;
+      }
+      details.advanced-fields {
+        border: 0;
+        border-radius: 18px;
+        background: #fff;
+      }
+      .portfolio-head, .work-card, .score-card {
+        border-radius: 20px;
+      }
+      .gp-hero {
+        grid-template-columns: 1fr;
+        text-align: center;
+        padding: 28px 20px;
+      }
+      .gp-avatar {
+        width: 72px;
+        height: 72px;
+        border-radius: 22px;
+        font-size: 32px;
+        margin: 0 auto;
+      }
+      .gp-hero h2 {
+        font-size: 26px;
+      }
+      .gp-bio {
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .gp-items {
+        grid-template-columns: 1fr;
+      }
+      .gp-item {
+        border-radius: 16px;
+      }
+      .evidence-item { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="app-header">
+      <div class="brand"><div class="logo">作</div><span>作品名片</span></div>
+      <div class="app-actions">
+        <div class="pill">个人能力证明工具</div>
+        <button class="secondary" type="button" id="fillDemoBtn">查看示例</button>
+      </div>
+    </header>
+
+    <section class="app-brief">
+      <div>
+        <h1>把经历整理成可信作品名片</h1>
+        <p class="lead">粘贴项目、文章、视频或活动经历，生成可用于求职、合作和接单的展示页。</p>
+      </div>
+      <div class="status-strip">
+        <div class="status-chip">轻量输入</div>
+        <div class="status-chip">能力提炼</div>
+        <div class="status-chip">可分享页面</div>
+      </div>
+    </section>
+
+    <main class="workspace" id="builder">
+      <section class="panel">
+        <p class="panel-kicker">作品名片编辑器</p>
+        <h3>1. 填写基础信息</h3>
+        <label>你的名字 / 昵称</label>
+        <input id="name" placeholder="例如：AS Lee" />
+
+        <label>你希望展示的身份</label>
+        <select id="identity">
+          <option>AI 产品经理</option>
+          <option>AI 产品与增长实践者</option>
+          <option>独立开发者</option>
+          <option>增长运营</option>
+          <option>内容创作者</option>
+          <option>自由职业者</option>
+          <option>活动策划</option>
+        </select>
+
+        <label>你准备用它做什么</label>
+        <select id="purpose">
+          <option value="job">找工作</option>
+          <option value="freelance">接单</option>
+          <option value="collab">找合作</option>
+          <option value="brand">做个人品牌</option>
+        </select>
+
+        <label>一句话定位</label>
+        <textarea id="bio" placeholder="例如：我正在用 AI 小产品验证转型方向。"></textarea>
+
+        <label>联系方式</label>
+        <input id="contact" placeholder="微信 / 邮箱 / 即刻 / 小红书 / 个人网站" />
+
+        <h3 style="margin-top:24px;">2. 添加作品</h3>
+        <div id="worksInput"></div>
+        <div class="actions">
+          <button class="secondary" type="button" id="addWorkBtn">+ 添加作品</button>
+          <button class="primary" type="button" id="generateBtn">生成作品名片</button>
+          <button class="ghost" type="button" id="saveDraftBtn">保存草稿</button>
+          <button class="ghost" type="button" id="loadDraftBtn">恢复草稿</button>
+        </div>
+      </section>
+
+      <section class="preview-shell">
+        <div class="preview-toolbar">
+          <span>实时预览</span>
+          <div class="preview-dots"><span></span><span></span><span></span></div>
+        </div>
+        <div class="preview" id="preview">
+          <div class="empty">
+            <div>
+              <h3>作品名片预览会显示在这里</h3>
+              <p>先填写资料，或点击“查看示例”。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast">已复制分享文案</div>
+
+  <script>
+    let workCount = 0;
+    let currentShareCopy = '';
+    const STORAGE_KEY = 'portfolioMvpDraft';
+
+    const skillMap = {
+      product: ['AI 产品设计', 'MVP 验证', '用户场景拆解'],
+      article: ['内容表达', '行业分析', '观点输出'],
+      video: ['视频策划', '内容传播', '用户理解'],
+      event: ['活动策划', '资源整合', '现场执行'],
+      case: ['项目复盘', '问题拆解', '商业理解'],
+      other: ['跨领域实践', '执行力', '学习能力']
+    };
+
+    const purposeMap = {
+      job: {
+        title: '求职能力证明',
+        angle: '突出岗位匹配能力、真实项目经验和可验证结果',
+        cta: '欢迎联系我交流岗位机会'
+      },
+      freelance: {
+        title: '接单能力证明',
+        angle: '突出可交付服务、代表案例和解决问题的方式',
+        cta: '欢迎联系我沟通项目合作'
+      },
+      collab: {
+        title: '合作介绍页',
+        angle: '突出过往实践、当前探索方向和资源互补点',
+        cta: '欢迎联系我聊聊合作可能'
+      },
+      brand: {
+        title: '个人品牌页',
+        angle: '突出长期方向、内容输出和持续实践',
+        cta: '欢迎关注我的持续实践'
+      }
+    };
+
+    const portfolioTypeMap = {
+      product: { title: '🤖 AI / 产品作品', icon: 'AI', color: '#7c3aed', bg: '#ede9fe' },
+      article: { title: '📄 文章作品', icon: '文', color: '#db2777', bg: '#fce7f3' },
+      video: { title: '🎬 视频作品', icon: '播', color: '#2563eb', bg: '#dbeafe' },
+      event: { title: '🎟 活动与运营案例', icon: '活', color: '#059669', bg: '#d1fae5' },
+      case: { title: '📎 项目案例', icon: '案', color: '#dc2626', bg: '#fee2e2' },
+      other: { title: '🧩 其他作品', icon: '作', color: '#f59e0b', bg: '#fef3c7' }
+    };
+
+    function addWork(data = {}) {
+      workCount += 1;
+      const container = document.getElementById('worksInput');
+      const div = document.createElement('div');
+      div.className = 'work-input';
+      div.dataset.work = 'true';
+      div.innerHTML = `
+        <div class="work-input-head">
+          <strong>作品 ${workCount}</strong>
+          <button class="remove-work" type="button">删除</button>
+        </div>
+        <div class="two">
+          <div>
+            <label>作品名称</label>
+            <input class="work-title" placeholder="例如：AI 简历生成器" />
+          </div>
+          <div>
+            <label>作品类型</label>
+            <select class="work-type">
+              <option value="product">产品 / 工具</option>
+              <option value="article">文章</option>
+              <option value="video">视频</option>
+              <option value="event">活动</option>
+              <option value="case">项目案例</option>
+              <option value="other">其他</option>
+            </select>
+          </div>
+        </div>
+        <label>作品链接，可选</label>
+        <input class="work-url" placeholder="https://..." />
+        <label>作品素材</label>
+        <textarea class="work-desc" placeholder="不用想格式：这个作品是什么、你做了什么、有什么结果，先随便写。"></textarea>
+        <details class="advanced-fields">
+          <summary>补充证据，可选</summary>
+          <label>项目背景</label>
+          <textarea class="work-background" placeholder="为什么做这个作品？它解决了什么问题？"></textarea>
+          <label>你的角色</label>
+          <textarea class="work-role" placeholder="你在其中负责什么？是主导、协作还是独立完成？"></textarea>
+          <label>关键行动</label>
+          <textarea class="work-action" placeholder="你具体做了哪些关键动作？"></textarea>
+          <label>结果与反馈</label>
+          <textarea class="work-result" placeholder="最好写清数据、用户反馈、业务结果或学习成果。"></textarea>
+          <label>证明材料</label>
+          <textarea class="work-proof" placeholder="例如：截图、用户评价、复盘文章、演示视频、数据看板等。"></textarea>
+        </details>
+      `;
+      const legacyDesc = data.desc || [data.background, data.role, data.action, data.result].filter(Boolean).join(' ');
+      div.querySelector('.work-title').value = data.title || '';
+      div.querySelector('.work-type').value = skillMap[data.type] ? data.type : 'product';
+      div.querySelector('.work-url').value = data.url || '';
+      div.querySelector('.work-desc').value = legacyDesc;
+      div.querySelector('.work-background').value = data.background || '';
+      div.querySelector('.work-role').value = data.role || '';
+      div.querySelector('.work-action').value = data.action || '';
+      div.querySelector('.work-result').value = data.result || '';
+      div.querySelector('.work-proof').value = data.proof || '';
+      container.appendChild(div);
+    }
+
+    function getWorks() {
+      return [...document.querySelectorAll('[data-work="true"]')].map(el => ({
+        title: el.querySelector('.work-title').value.trim(),
+        type: el.querySelector('.work-type').value,
+        url: el.querySelector('.work-url').value.trim(),
+        desc: el.querySelector('.work-desc').value.trim(),
+        background: el.querySelector('.work-background').value.trim(),
+        role: el.querySelector('.work-role').value.trim(),
+        action: el.querySelector('.work-action').value.trim(),
+        result: el.querySelector('.work-result').value.trim(),
+        proof: el.querySelector('.work-proof').value.trim()
+      })).filter(w => w.title || w.url || w.desc || w.background || w.role || w.action || w.result || w.proof);
+    }
+
+    function inferSummary(work) {
+      const typeName = {
+        product: '一个产品/工具项目',
+        article: '一篇内容作品',
+        video: '一个视频内容作品',
+        event: '一次活动项目',
+        case: '一个项目案例',
+        other: '一个综合实践项目'
+      }[work.type];
+      const source = [work.desc, work.background, work.action, work.result].filter(Boolean).join(' ');
+      if (source.length > 18) return source.slice(0, 96) + (source.length > 96 ? '…' : '');
+      return `${typeName}，用于展示具体实践、问题解决和执行能力。`;
+    }
+
+    function credibilityScore(works) {
+      let score = 40;
+      works.forEach(w => {
+        const evidenceText = [w.desc, w.background, w.role, w.action, w.result, w.proof].join(' ');
+        if (w.desc.length > 18) score += 8;
+        if (w.url) score += 5;
+        if (w.background) score += 3;
+        if (w.role) score += 3;
+        if (w.action.length > 24) score += 5;
+        if (w.result.length > 12) score += 7;
+        if (w.proof || /截图|评价|反馈|链接|视频|数据|看板|证明|推荐|复盘/.test(evidenceText)) score += 5;
+        if (/用户|访问|收入|报名|增长|数据|反馈|转化|播放|阅读|成交|GMV|UV|PV|下载|客户|提升|降低|节省|完成|上线/.test(evidenceText)) score += 6;
+      });
+      return Math.min(95, score);
+    }
+
+    function missingTips(works) {
+      const tips = [];
+      if (works.some(w => !w.desc && !w.action)) tips.push('有些作品还只有标题，补几句素材后会更容易看出你的能力。');
+      if (works.some(w => !w.url && !w.proof)) tips.push('部分作品缺少可验证材料，建议补链接、截图、视频或用户反馈。');
+      if (!works.some(w => /用户|访问|收入|报名|增长|数据|反馈|转化|播放|阅读|成交|GMV|UV|PV|下载|客户|提升|降低|节省|完成|上线|\d/.test([w.desc, w.result].join(' ')))) tips.push('如果有结果数据，建议补一个数字，例如访问量、用户反馈、报名数或上线结果。');
+      if (works.length < 3) tips.push('建议整理 3-5 个代表作品，让能力画像更完整。');
+      if (!tips.length) tips.push('当前信息已经适合对外分享，后续可继续补充截图和第三方反馈。');
+      return tips;
+    }
+
+    function normalizeURL(url) {
+      const trimmed = url.trim();
+      if (!trimmed) return null;
+      const candidate = /^[a-z][a-z0-9+.-]*:/i.test(trimmed) ? trimmed : `https://${trimmed}`;
+      try {
+        const parsed = new URL(candidate);
+        if (!['http:', 'https:', 'mailto:'].includes(parsed.protocol)) return null;
+        return { href: parsed.href, label: candidate };
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function generatePortfolio() {
+      const name = document.getElementById('name').value.trim() || '未命名创作者';
+      const identity = document.getElementById('identity').value;
+      const purpose = document.getElementById('purpose').value;
+      const bio = document.getElementById('bio').value.trim() || '我正在持续积累项目、内容与产品实践，希望把做过的事情转化为可验证的能力证明。';
+      const contact = document.getElementById('contact').value.trim() || '请补充联系方式';
+      const works = getWorks();
+
+      if (!works.length) {
+        alert('请至少添加 1 个作品');
+        return;
+      }
+
+      const allSkills = [...new Set(works.flatMap(w => skillMap[w.type] || skillMap.other))].slice(0, 9);
+      const p = purposeMap[purpose];
+      const score = credibilityScore(works);
+      const tips = missingTips(works);
+
+      const groupedWorks = works.reduce((groups, work) => {
+        const key = portfolioTypeMap[work.type] ? work.type : 'other';
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(work);
+        return groups;
+      }, {});
+
+      const htmlSections = Object.entries(groupedWorks).map(([type, items]) => {
+        const config = portfolioTypeMap[type] || portfolioTypeMap.other;
+        const cards = items.map(work => {
+          const safeLink = normalizeURL(work.url);
+          const desc = inferSummary(work);
+          const content = `
+            <div class="gp-item-icon" style="background:${config.color}">${escapeHTML(config.icon)}</div>
+            <div class="gp-item-content">
+              <div class="gp-item-name">${escapeHTML(work.title || '未命名作品')}</div>
+              <div class="gp-item-desc">${escapeHTML(desc)}</div>
+              ${safeLink ? '<div class="gp-link-tag">查看作品</div>' : (work.url ? '<div class="invalid-link">链接格式不可识别</div>' : '')}
+            </div>
+            ${safeLink ? '<div class="gp-arrow">›</div>' : ''}
+          `;
+          return safeLink
+            ? `<a class="gp-item" href="${escapeHTML(safeLink.href)}" target="_blank" rel="noopener noreferrer">${content}</a>`
+            : `<div class="gp-item">${content}</div>`;
+        }).join('');
+
+        return `
+          <section class="gp-section">
+            <div class="gp-section-head">
+              <div class="gp-section-icon" style="background:${config.bg};color:${config.color}">${escapeHTML(config.icon)}</div>
+              <div class="gp-section-title">${escapeHTML(config.title)}</div>
+            </div>
+            <div class="gp-items">${cards}</div>
+          </section>
+        `;
+      }).join('');
+
+      currentShareCopy = `我是${name}，${identity}。这是我的作品名片，整理了${works.length}个代表作品和它们证明的能力。${p.cta}。`;
+
+      document.getElementById('preview').innerHTML = `
+        <div class="generated-page">
+          <header class="gp-hero">
+            <div class="gp-avatar">${escapeHTML(name[0] || '作')}</div>
+            <div class="gp-hero-content">
+              <h2>${escapeHTML(name)}</h2>
+              <div class="gp-identity">${escapeHTML(identity)} · ${p.title}</div>
+              <div class="gp-bio">${escapeHTML(bio)}</div>
+              <div class="tags">${allSkills.map(s => `<span class="tag">${escapeHTML(s)}</span>`).join('')}</div>
+              <div class="gp-contact">✉ ${escapeHTML(contact)}</div>
+            </div>
+          </header>
+
+          ${htmlSections}
+
+          <div class="gp-score">
+            <strong>能力证明完整度：${score}/100</strong>
+            <ul>${tips.map(t => `<li>${escapeHTML(t)}</li>`).join('')}</ul>
+          </div>
+
+          <div class="gp-cta">
+            <h3>想进一步了解？</h3>
+            <p>${escapeHTML(p.cta)}：${escapeHTML(contact)}</p>
+            <div class="actions export-actions">
+              <button class="primary" type="button" id="copyShareBtn">复制分享文案</button>
+              <button class="secondary" type="button" id="downloadBtn">下载当前页面</button>
+            </div>
+          </div>
+          <div class="gp-footer">由作品名片生成 · 把经历转化为可信能力证明</div>
+        </div>
+      `;
+      saveDraft(false);
+    }
+
+    function fillDemo() {
+      document.getElementById('name').value = 'AS Lee';
+      document.getElementById('identity').value = 'AI 产品与增长实践者';
+      document.getElementById('purpose').value = 'collab';
+      document.getElementById('bio').value = '我关注 AI 产品、增长和个人品牌建设，擅长用低成本工具快速验证产品想法，并通过内容和社群获得早期反馈。';
+      document.getElementById('contact').value = '微信：your-wechat / 邮箱：hello@example.com';
+      document.getElementById('worksInput').innerHTML = '';
+      workCount = 0;
+      addWork({
+        title: 'AI 作品名片生成器',
+        type: 'product',
+        url: 'https://example.com',
+        desc: '做了一个帮助 AI 转型者和独立创作者整理作品的工具，用户粘贴项目、文章、视频或活动经历后，可以生成个人定位、作品卡片、能力标签和完整度建议。',
+        background: 'AI 转型者、独立开发者和内容创作者有很多零散经历，但缺少一个能说明能力的展示页。',
+        role: '独立负责产品定义、页面原型、规则生成逻辑和早期演示。',
+        action: '设计轻量输入、作品分组、能力标签和完整度建议，让用户能快速把素材整理成作品名片。',
+        result: '完成可演示版本，支持示例数据、作品生成、草稿保存和 HTML 导出。',
+        proof: '可提供在线演示、页面截图和功能录屏。'
+      });
+      addWork({
+        title: 'AI 时代增长方法论文章',
+        type: 'article',
+        url: '',
+        desc: '写了一篇关于 AI 时代增长方法的文章，分析普通人如何用内容、社群和自动化工具做低成本验证。',
+        background: 'AI 工具降低了产品生产门槛，越来越多个人和小团队需要重新理解增长。',
+        role: '负责选题、观点框架、案例整理和文章撰写。',
+        action: '围绕产品供给增加、获客成本变化、内容和社群增长路径，整理出普通人可执行的方法。',
+        result: '形成一篇可用于个人品牌展示的观点型文章。',
+        proof: '可补充公众号、即刻或知识星球发布链接。'
+      });
+      addWork({
+        title: '数字藏品发行与活动案例',
+        type: 'case',
+        url: '',
+        desc: '参与数字内容发行业务，负责项目沟通、发行策划、社群触达和活动执行，沉淀了内容发行和用户运营经验。',
+        background: '数字内容发行需要在短时间内完成项目沟通、用户触达和活动转化。',
+        role: '参与项目沟通、发行策划、社群触达和活动执行。',
+        action: '协同内容方和运营资源，推进发行节奏、活动节点和用户沟通。',
+        result: '积累了内容发行、用户运营和商业合作经验。',
+        proof: '可补充活动页面、海报、社群截图或项目复盘。'
+      });
+      addWork({
+        title: 'AI 时代如何做需求优先级',
+        type: 'video',
+        url: 'https://www.bilibili.com/video/example',
+        desc: '围绕 AI 产品早期验证，录制了一期需求优先级判断方法的视频内容。',
+        result: '可作为产品思维和内容表达能力的展示材料。'
+      });
+      addWork({
+        title: '2025 AI 大会执行方案',
+        type: 'event',
+        url: 'https://docs.qq.com/pdf/example',
+        desc: '整理过一份活动执行方案，覆盖策划、嘉宾邀请、社群运营和现场执行流程。',
+        result: '沉淀为可复用的活动项目案例。'
+      });
+      generatePortfolio();
+    }
+
+    function escapeHTML(str) {
+      return String(str).replace(/[&<>'"]/g, tag => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+      }[tag]));
+    }
+
+    function copyText(text) {
+      const fallbackCopy = () => {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        const ok = document.execCommand('copy');
+        textarea.remove();
+        return ok;
+      };
+
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text)
+          .then(() => showToast('已复制分享文案'))
+          .catch(() => showToast(fallbackCopy() ? '已复制分享文案' : '复制失败，请手动复制'));
+        return;
+      }
+
+      showToast(fallbackCopy() ? '已复制分享文案' : '复制失败，请手动复制');
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.style.display = 'block';
+      setTimeout(() => toast.style.display = 'none', 1800);
+    }
+
+    function downloadHTML() {
+      const previewNode = document.getElementById('preview').cloneNode(true);
+      previewNode.querySelectorAll('.export-actions').forEach(el => el.remove());
+      const preview = previewNode.innerHTML;
+      const html = `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"><title>我的作品集</title><style>${document.querySelector('style').innerHTML}</style></head><body><div class="shell"><section class="preview">${preview}</section></div></body></html>`;
+      const blob = new Blob([html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'my-portfolio.html';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function collectDraft() {
+      return {
+        name: document.getElementById('name').value,
+        identity: document.getElementById('identity').value,
+        purpose: document.getElementById('purpose').value,
+        bio: document.getElementById('bio').value,
+        contact: document.getElementById('contact').value,
+        works: getWorks()
+      };
+    }
+
+    function applyDraft(draft) {
+      if (!draft) return;
+      document.getElementById('name').value = draft.name || '';
+      document.getElementById('identity').value = draft.identity || 'AI 产品经理';
+      document.getElementById('purpose').value = draft.purpose || 'job';
+      document.getElementById('bio').value = draft.bio || '';
+      document.getElementById('contact').value = draft.contact || '';
+      document.getElementById('worksInput').innerHTML = '';
+      workCount = 0;
+      (draft.works && draft.works.length ? draft.works : [{}]).forEach(addWork);
+    }
+
+    function saveDraft(showMessage = true) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(collectDraft()));
+        if (showMessage) showToast('草稿已保存');
+      } catch (error) {
+        if (showMessage) showToast('当前浏览器不支持保存草稿');
+      }
+    }
+
+    function loadDraft() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+          showToast('暂无可恢复草稿');
+          return;
+        }
+        applyDraft(JSON.parse(raw));
+        showToast('草稿已恢复');
+      } catch (error) {
+        showToast('草稿读取失败');
+      }
+    }
+
+    document.getElementById('fillDemoBtn').addEventListener('click', fillDemo);
+    document.getElementById('addWorkBtn').addEventListener('click', () => addWork());
+    document.getElementById('generateBtn').addEventListener('click', generatePortfolio);
+    document.getElementById('saveDraftBtn').addEventListener('click', () => saveDraft(true));
+    document.getElementById('loadDraftBtn').addEventListener('click', loadDraft);
+    document.getElementById('worksInput').addEventListener('click', event => {
+      if (!event.target.classList.contains('remove-work')) return;
+      const work = event.target.closest('[data-work="true"]');
+      if (work) work.remove();
+      if (!document.querySelector('[data-work="true"]')) addWork();
+    });
+    document.getElementById('preview').addEventListener('click', event => {
+      if (event.target.id === 'copyShareBtn') copyText(currentShareCopy);
+      if (event.target.id === 'downloadBtn') downloadHTML();
+    });
+
+    addWork();
+  </script>
+</body>
+</html>
