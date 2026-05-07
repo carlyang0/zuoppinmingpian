@@ -1,0 +1,170 @@
+<view class="page">
+  <view class="app-header">
+    <view class="brand">
+      <view class="logo">作</view>
+      <view class="brand-text">作品名片</view>
+    </view>
+    <button class="demo-btn" bindtap="fillDemo">查看示例</button>
+  </view>
+
+  <view class="hero">
+    <view class="hero-title">把经历整理成可信作品名片</view>
+    <view class="hero-desc">粘贴项目、文章、视频或活动经历，生成可用于求职、合作和接单的展示页。</view>
+    <view class="chips">
+      <text class="chip">轻量输入</text>
+      <text class="chip">能力提炼</text>
+      <text class="chip">可分享页面</text>
+    </view>
+  </view>
+
+  <view class="panel">
+    <view class="panel-kicker">作品名片编辑器</view>
+    <view class="section-title">1. 填写基础信息</view>
+
+    <view class="field">
+      <view class="label">你的名字 / 昵称</view>
+      <input class="control" value="{{profile.name}}" data-field="name" bindinput="onProfileInput" placeholder="例如：AS Lee" />
+    </view>
+
+    <view class="field">
+      <view class="label">你希望展示的身份</view>
+      <picker range="{{identityOptions}}" value="{{profile.identityIndex}}" bindchange="onIdentityChange">
+        <view class="picker-control">{{identityOptions[profile.identityIndex]}}</view>
+      </picker>
+    </view>
+
+    <view class="field">
+      <view class="label">你准备用它做什么</view>
+      <picker range="{{purposeLabels}}" value="{{profile.purposeIndex}}" bindchange="onPurposeChange">
+        <view class="picker-control">{{purposeLabels[profile.purposeIndex]}}</view>
+      </picker>
+    </view>
+
+    <view class="field">
+      <view class="label">一句话定位</view>
+      <textarea class="control textarea" value="{{profile.bio}}" data-field="bio" bindinput="onProfileInput" placeholder="例如：我正在用 AI 小产品验证转型方向。"></textarea>
+    </view>
+
+    <view class="field">
+      <view class="label">联系方式</view>
+      <input class="control" value="{{profile.contact}}" data-field="contact" bindinput="onProfileInput" placeholder="微信 / 邮箱 / 即刻 / 小红书 / 个人网站" />
+    </view>
+
+    <view class="section-title work-title">2. 添加作品</view>
+    <block wx:for="{{works}}" wx:key="id">
+      <view class="work-card">
+        <view class="work-head">
+          <text class="work-index">作品 {{index + 1}}</text>
+          <button class="remove-btn" data-index="{{index}}" bindtap="removeWork">删除</button>
+        </view>
+
+        <view class="field">
+          <view class="label">作品名称</view>
+          <input class="control" value="{{item.title}}" data-index="{{index}}" data-field="title" bindinput="onWorkInput" placeholder="例如：AI 简历生成器" />
+        </view>
+
+        <view class="field">
+          <view class="label">作品类型</view>
+          <picker range="{{typeLabels}}" value="{{item.typeIndex}}" data-index="{{index}}" bindchange="onWorkTypeChange">
+            <view class="picker-control">{{typeLabels[item.typeIndex]}}</view>
+          </picker>
+        </view>
+
+        <view class="field">
+          <view class="label">作品链接，可选</view>
+          <input class="control" value="{{item.url}}" data-index="{{index}}" data-field="url" bindinput="onWorkInput" placeholder="https://..." />
+        </view>
+
+        <view class="field">
+          <view class="label">作品素材</view>
+          <textarea class="control textarea" value="{{item.desc}}" data-index="{{index}}" data-field="desc" bindinput="onWorkInput" placeholder="不用想格式：这个作品是什么、你做了什么、有什么结果，先随便写。"></textarea>
+        </view>
+
+        <button class="advanced-toggle" data-index="{{index}}" bindtap="toggleAdvanced">
+          {{item.expanded ? '收起补充证据' : '补充证据，可选'}}
+        </button>
+
+        <view wx:if="{{item.expanded}}" class="advanced">
+          <view class="field">
+            <view class="label">项目背景</view>
+            <textarea class="control textarea small" value="{{item.background}}" data-index="{{index}}" data-field="background" bindinput="onWorkInput" placeholder="为什么做这个作品？"></textarea>
+          </view>
+          <view class="field">
+            <view class="label">你的角色</view>
+            <textarea class="control textarea small" value="{{item.role}}" data-index="{{index}}" data-field="role" bindinput="onWorkInput" placeholder="你负责什么？"></textarea>
+          </view>
+          <view class="field">
+            <view class="label">结果与反馈</view>
+            <textarea class="control textarea small" value="{{item.result}}" data-index="{{index}}" data-field="result" bindinput="onWorkInput" placeholder="数据、反馈、上线结果或学习成果。"></textarea>
+          </view>
+          <view class="field">
+            <view class="label">证明材料</view>
+            <textarea class="control textarea small" value="{{item.proof}}" data-index="{{index}}" data-field="proof" bindinput="onWorkInput" placeholder="截图、用户评价、复盘文章或演示视频。"></textarea>
+          </view>
+        </view>
+      </view>
+    </block>
+
+    <view class="actions">
+      <button class="primary-btn" bindtap="generatePortfolio">生成作品名片</button>
+      <button class="secondary-btn" bindtap="addWork">添加作品</button>
+      <button class="ghost-btn" bindtap="saveDraft">保存草稿</button>
+      <button class="ghost-btn" bindtap="loadDraft">恢复草稿</button>
+    </view>
+  </view>
+
+  <view class="preview-panel">
+    <view class="preview-title">作品名片预览</view>
+
+    <view wx:if="{{!portfolio}}" class="empty">
+      <view class="empty-title">预览会显示在这里</view>
+      <view class="empty-desc">先填写资料，或点击“查看示例”。</view>
+    </view>
+
+    <view wx:else class="generated">
+      <view class="gp-hero">
+        <view class="gp-avatar">{{portfolio.initial}}</view>
+        <view class="gp-content">
+          <view class="gp-name">{{portfolio.name}}</view>
+          <view class="gp-identity">{{portfolio.identity}} · {{portfolio.purposeTitle}}</view>
+          <view class="gp-bio">{{portfolio.bio}}</view>
+          <view class="tags">
+            <text wx:for="{{portfolio.tags}}" wx:key="*this" class="tag">{{item}}</text>
+          </view>
+          <view class="contact">联系：{{portfolio.contact}}</view>
+        </view>
+      </view>
+
+      <block wx:for="{{portfolio.blocks}}" wx:key="type">
+        <view class="gp-section">
+          <view class="gp-section-head">
+            <view class="gp-section-icon" style="background: {{item.bg}}; color: {{item.color}};">{{item.icon}}</view>
+            <view class="gp-section-title">{{item.title}}</view>
+          </view>
+          <block wx:for="{{item.items}}" wx:for-item="work" wx:key="id">
+            <view class="gp-item" data-link="{{work.safeUrl}}" bindtap="copyWorkLink">
+              <view class="gp-item-icon" style="background: {{item.color}};">{{item.icon}}</view>
+              <view class="gp-item-content">
+                <view class="gp-item-name">{{work.title}}</view>
+                <view class="gp-item-desc">{{work.summary}}</view>
+                <view wx:if="{{work.safeUrl}}" class="link-tag">复制链接</view>
+              </view>
+              <view wx:if="{{work.safeUrl}}" class="arrow">›</view>
+            </view>
+          </block>
+        </view>
+      </block>
+
+      <view class="score-card">
+        <view class="score-title">能力证明完整度：{{portfolio.score}}/100</view>
+        <view wx:for="{{portfolio.tips}}" wx:key="*this" class="tip">• {{item}}</view>
+      </view>
+
+      <view class="cta-card">
+        <view class="cta-title">想进一步了解？</view>
+        <view class="cta-desc">{{portfolio.cta}}：{{portfolio.contact}}</view>
+        <button class="primary-btn" bindtap="copyShare">复制分享文案</button>
+      </view>
+    </view>
+  </view>
+</view>

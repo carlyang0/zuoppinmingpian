@@ -1,0 +1,14 @@
+{
+  "pages": [
+    "pages/index/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "作品名片",
+    "navigationBarBackgroundColor": "#eef0ed",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#eef0ed",
+    "backgroundTextStyle": "dark"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}
