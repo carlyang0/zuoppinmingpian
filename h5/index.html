@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="format-detection" content="telephone=no,email=no,address=no" />
+  <meta name="theme-color" content="#eef0ed" />
+  <meta name="description" content="作品名片，把项目、文章、视频和活动经历整理成可信的个人能力证明页。" />
+  <meta property="og:title" content="作品名片｜个人能力证明页" />
+  <meta property="og:description" content="把零散经历整理成可分享的作品名片，用于求职、合作和接单。" />
+  <title>作品名片｜个人能力证明页</title>
+  <style>
+    :root {
+      --bg: #eef0ed;
+      --card: #ffffff;
+      --text: #171717;
+      --muted: #666666;
+      --line: #e8e8e3;
+      --primary: #111827;
+      --primary-2: #374151;
+      --accent: #f0efe9;
+      --warning: #b45309;
+      --radius: 18px;
+      --shadow: 0 16px 50px rgba(0,0,0,0.08);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+      overflow-x: hidden;
+    }
+
+    button, input, textarea, select {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: max(14px, env(safe-area-inset-top)) 14px max(36px, env(safe-area-inset-bottom));
+    }
+
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 24px;
+      background: rgba(255,255,255,0.86);
+      box-shadow: 0 12px 34px rgba(0,0,0,0.08);
+      position: sticky;
+      top: max(10px, env(safe-area-inset-top));
+      z-index: 5;
+      backdrop-filter: blur(18px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 900;
+      font-size: 18px;
+    }
+
+    .logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: var(--primary);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .pill-btn, .primary-btn, .secondary-btn, .ghost-btn {
+      min-height: 44px;
+      border-radius: 14px;
+      padding: 0 16px;
+      font-weight: 900;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+    }
+
+    .pill-btn, .secondary-btn {
+      background: var(--accent);
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    .primary-btn {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .ghost-btn {
+      background: #fff;
+      color: var(--muted);
+      border: 1px solid var(--line);
+    }
+
+    .hero {
+      padding: 34px 2px 20px;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: 52px;
+      line-height: 1.06;
+      letter-spacing: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .hero p {
+      margin: 12px 0 0;
+      max-width: 680px;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    .chip {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #fff;
+      color: var(--primary-2);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(320px, 400px) 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .panel, .preview-shell {
+      border-radius: 26px;
+      background: var(--card);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+    }
+
+    .panel {
+      padding: 18px;
+    }
+
+    .preview-shell {
+      padding: 12px;
+      position: sticky;
+      top: 92px;
+    }
+
+    .panel-kicker, .preview-kicker {
+      margin: 0 0 4px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 20px;
+      letter-spacing: 0;
+    }
+
+    label {
+      display: block;
+      margin: 14px 0 7px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      min-height: 48px;
+      border: 0;
+      border-radius: 14px;
+      padding: 12px 13px;
+      background: #fbfbfa;
+      color: var(--text);
+      font-size: 16px;
+      box-shadow: inset 0 0 0 1px rgba(60,60,67,0.12);
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    textarea {
+      min-height: 104px;
+      resize: vertical;
+      line-height: 1.55;
+    }
+
+    .work-input {
+      margin-top: 12px;
+      padding: 14px;
+      border-radius: 20px;
+      background: #fbfbfa;
+    }
+
+    .work-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .remove-btn {
+      min-height: 34px;
+      padding: 0 10px;
+      border-radius: 10px;
+      background: #fff7ed;
+      color: #9a3412;
+      border: 1px solid #fed7aa;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    details {
+      margin-top: 12px;
+      padding: 10px 12px 14px;
+      border-radius: 18px;
+      background: #fff;
+    }
+
+    summary {
+      cursor: pointer;
+      color: var(--primary-2);
+      font-weight: 900;
+      font-size: 14px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    .actions .primary-btn {
+      flex: 1 1 100%;
+    }
+
+    .actions .secondary-btn, .actions .ghost-btn {
+      flex: 1 1 calc(50% - 8px);
+    }
+
+    .preview {
+      max-height: calc(100vh - 142px);
+      overflow: auto;
+      padding: 18px;
+      border-radius: 22px;
+      background: #fff;
+    }
+
+    .empty {
+      min-height: 420px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: var(--muted);
+      border: 1px dashed var(--line);
+      border-radius: 18px;
+      padding: 26px;
+      background: #fbfbfa;
+    }
+
+    .generated-page {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    .gp-hero {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 28px;
+      align-items: center;
+      padding: 34px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .gp-hero:before {
+      content: "";
+      position: absolute;
+      top: -60px;
+      right: -60px;
+      width: 180px;
+      height: 180px;
+      background: #f5e7cf;
+      border-radius: 999px;
+      opacity: 0.6;
+    }
+
+    .gp-avatar {
+      width: 92px;
+      height: 92px;
+      border-radius: 26px;
+      background: var(--primary);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 42px;
+      font-weight: 900;
+      position: relative;
+      z-index: 1;
+    }
+
+    .gp-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .gp-name {
+      font-size: 42px;
+      line-height: 1;
+      letter-spacing: 0;
+      font-weight: 900;
+    }
+
+    .gp-identity {
+      margin-top: 8px;
+      color: var(--primary-2);
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .gp-bio {
+      margin-top: 10px;
+      color: var(--muted);
+    }
+
+    .tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    .tag {
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: var(--accent);
+      border: 1px solid var(--line);
+      color: var(--primary-2);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .contact {
+      display: inline-flex;
+      margin-top: 16px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: var(--accent);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .gp-section {
+      margin-bottom: 28px;
+    }
+
+    .gp-section-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .gp-section-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .gp-section-title {
+      font-size: 20px;
+      font-weight: 900;
+    }
+
+    .gp-items {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .gp-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--card);
+      min-width: 0;
+    }
+
+    .gp-item-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+
+    .gp-item-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .gp-item-name {
+      font-size: 15px;
+      font-weight: 900;
+      margin-bottom: 4px;
+    }
+
+    .gp-item-desc {
+      color: var(--muted);
+      font-size: 13px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    .link-tag {
+      display: inline-flex;
+      margin-top: 7px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: var(--accent);
+      color: var(--primary-2);
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .arrow {
+      color: #999;
+      font-weight: 900;
+    }
+
+    .score-card {
+      padding: 18px;
+      border-radius: 16px;
+      background: #fefce8;
+      border: 1px solid #fde68a;
+      margin: 28px 0;
+    }
+
+    .score-title {
+      color: var(--warning);
+      font-weight: 900;
+    }
+
+    .tip {
+      margin-top: 8px;
+      color: #71480b;
+      font-size: 14px;
+    }
+
+    .cta-card {
+      text-align: center;
+      padding: 34px 22px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      margin-top: 32px;
+    }
+
+    .cta-title {
+      font-size: 20px;
+      font-weight: 900;
+    }
+
+    .cta-desc {
+      margin: 8px 0 18px;
+      color: var(--muted);
+    }
+
+    .share-panel {
+      display: none;
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 18px;
+      background: #fbfbfa;
+      text-align: center;
+    }
+
+    .share-panel.is-open {
+      display: block;
+    }
+
+    .qr-box {
+      width: 180px;
+      height: 180px;
+      margin: 10px auto;
+      padding: 10px;
+      border-radius: 16px;
+      background: #fff;
+      border: 1px solid var(--line);
+    }
+
+    .qr-box img {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .share-url {
+      word-break: break-all;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .footer {
+      text-align: center;
+      color: #999;
+      font-size: 13px;
+      padding: 28px 0 6px;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: max(22px, env(safe-area-inset-bottom));
+      transform: translateX(-50%);
+      padding: 12px 16px;
+      border-radius: 999px;
+      background: var(--primary);
+      color: #fff;
+      font-size: 14px;
+      display: none;
+      z-index: 10;
+    }
+
+    @media (max-width: 820px) {
+      .page {
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+
+      .app-header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .header-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .header-actions button {
+        flex: 1;
+        min-width: 0;
+        padding: 0 10px;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .hero h1 {
+        font-size: 31px;
+        line-height: 1.16;
+      }
+
+      .hero h1 span {
+        display: block;
+      }
+
+      .preview-shell {
+        position: static;
+      }
+
+      .preview {
+        max-height: none;
+      }
+
+      .gp-hero {
+        grid-template-columns: 1fr;
+        text-align: center;
+        padding: 28px 20px;
+      }
+
+      .gp-avatar {
+        width: 72px;
+        height: 72px;
+        border-radius: 22px;
+        font-size: 32px;
+        margin: 0 auto;
+      }
+
+      .gp-name {
+        font-size: 32px;
+      }
+
+      .gp-items {
+        grid-template-columns: 1fr;
+      }
+
+      .gp-section-head {
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="app-header">
+      <div class="brand">
+        <div class="logo">作</div>
+        <span>作品名片</span>
+      </div>
+      <div class="header-actions">
+        <button class="pill-btn" id="demoBtn" type="button">示例</button>
+        <button class="pill-btn" id="shareBtn" type="button">二维码</button>
+      </div>
+    </header>
+
+    <section class="hero">
+      <h1>把经历整理成<span>可信作品名片</span></h1>
+      <p>粘贴项目、文章、视频或活动经历，生成可用于求职、合作和接单的展示页。手机点链接或扫码即可查看。</p>
+      <div class="chips">
+        <span class="chip">移动端优先</span>
+        <span class="chip">能力提炼</span>
+        <span class="chip">二维码分享</span>
+      </div>
+    </section>
+
+    <section class="layout">
+      <form class="panel" id="editor">
+        <p class="panel-kicker">作品名片编辑器</p>
+        <h2>1. 填写基础信息</h2>
+
+        <label for="name">你的名字 / 昵称</label>
+        <input id="name" placeholder="例如：AS Lee" />
+
+        <label for="identity">你希望展示的身份</label>
+        <select id="identity">
+          <option>AI 产品经理</option>
+          <option>AI 产品与增长实践者</option>
+          <option>独立开发者</option>
+          <option>增长运营</option>
+          <option>内容创作者</option>
+          <option>自由职业者</option>
+          <option>活动策划</option>
+        </select>
+
+        <label for="purpose">你准备用它做什么</label>
+        <select id="purpose">
+          <option value="job">找工作</option>
+          <option value="freelance">接单</option>
+          <option value="collab">找合作</option>
+          <option value="brand">做个人品牌</option>
+        </select>
+
+        <label for="bio">一句话定位</label>
+        <textarea id="bio" placeholder="例如：我正在用 AI 小产品验证转型方向。"></textarea>
+
+        <label for="contact">联系方式</label>
+        <input id="contact" placeholder="微信 / 邮箱 / 即刻 / 小红书 / 个人网站" />
+
+        <h2 style="margin-top:24px;">2. 添加作品</h2>
+        <div id="worksInput"></div>
+
+        <div class="actions">
+          <button class="primary-btn" id="generateBtn" type="button">生成作品名片</button>
+          <button class="secondary-btn" id="addWorkBtn" type="button">添加作品</button>
+          <button class="ghost-btn" id="saveDraftBtn" type="button">保存草稿</button>
+          <button class="ghost-btn" id="loadDraftBtn" type="button">恢复草稿</button>
+        </div>
+      </form>
+
+      <section class="preview-shell">
+        <p class="preview-kicker">实时预览</p>
+        <div class="preview" id="preview">
+          <div class="empty">
+            <div>
+              <h2>作品名片预览会显示在这里</h2>
+              <p>先填写资料，或点击“查看示例”。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <div class="toast" id="toast">已复制</div>
+
+  <script>
+    const storageKey = 'portfolioH5Draft';
+    let workCount = 0;
+    let currentShareCopy = '';
+    let currentShareUrl = '';
+
+    const skillMap = {
+      product: ['AI 产品设计', 'MVP 验证', '用户场景拆解'],
+      article: ['内容表达', '行业分析', '观点输出'],
+      video: ['视频策划', '内容传播', '用户理解'],
+      event: ['活动策划', '资源整合', '现场执行'],
+      case: ['项目复盘', '问题拆解', '商业理解'],
+      other: ['跨领域实践', '执行力', '学习能力']
+    };
+
+    const purposeMap = {
+      job: { title: '求职能力证明', cta: '欢迎联系我交流岗位机会' },
+      freelance: { title: '接单能力证明', cta: '欢迎联系我沟通项目合作' },
+      collab: { title: '合作介绍页', cta: '欢迎联系我聊聊合作可能' },
+      brand: { title: '个人品牌页', cta: '欢迎关注我的持续实践' }
+    };
+
+    const typeMap = {
+      product: { title: 'AI / 产品作品', icon: 'AI', color: '#7c3aed', bg: '#ede9fe' },
+      article: { title: '文章作品', icon: '文', color: '#db2777', bg: '#fce7f3' },
+      video: { title: '视频作品', icon: '播', color: '#2563eb', bg: '#dbeafe' },
+      event: { title: '活动与运营案例', icon: '活', color: '#059669', bg: '#d1fae5' },
+      case: { title: '项目案例', icon: '案', color: '#dc2626', bg: '#fee2e2' },
+      other: { title: '其他作品', icon: '作', color: '#f59e0b', bg: '#fef3c7' }
+    };
+
+    function escapeHTML(str) {
+      return String(str || '').replace(/[&<>'"]/g, tag => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+      }[tag]));
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.style.display = 'block';
+      setTimeout(() => toast.style.display = 'none', 1800);
+    }
+
+    function normalizeURL(url) {
+      const trimmed = String(url || '').trim();
+      if (!trimmed) return null;
+      const candidate = /^[a-z][a-z0-9+.-]*:/i.test(trimmed) ? trimmed : `https://${trimmed}`;
+      try {
+        const parsed = new URL(candidate);
+        if (!['http:', 'https:', 'mailto:'].includes(parsed.protocol)) return null;
+        return { href: parsed.href, label: candidate };
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function encodePayload(payload) {
+      const json = JSON.stringify(payload);
+      const bytes = new TextEncoder().encode(json);
+      let binary = '';
+      bytes.forEach(byte => binary += String.fromCharCode(byte));
+      return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+    }
+
+    function decodePayload(token) {
+      const normalized = token.replace(/-/g, '+').replace(/_/g, '/');
+      const padded = normalized + '='.repeat((4 - normalized.length % 4) % 4);
+      const binary = atob(padded);
+      const bytes = Uint8Array.from(binary, char => char.charCodeAt(0));
+      return JSON.parse(new TextDecoder().decode(bytes));
+    }
+
+    function getSharedDraft() {
+      const match = location.hash.match(/(?:^#|&)card=([^&]+)/);
+      if (!match) return null;
+      try {
+        return decodePayload(decodeURIComponent(match[1]));
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function buildShareUrl(draft) {
+      const url = new URL(location.href);
+      url.hash = `card=${encodeURIComponent(encodePayload(draft))}`;
+      return url.toString();
+    }
+
+    function addWork(data = {}) {
+      workCount += 1;
+      const container = document.getElementById('worksInput');
+      const div = document.createElement('div');
+      div.className = 'work-input';
+      div.dataset.work = 'true';
+      div.innerHTML = `
+        <div class="work-head">
+          <span>作品 ${workCount}</span>
+          <button class="remove-btn" type="button">删除</button>
+        </div>
+        <label>作品名称</label>
+        <input class="work-title" placeholder="例如：AI 简历生成器" />
+        <label>作品类型</label>
+        <select class="work-type">
+          <option value="product">产品 / 工具</option>
+          <option value="article">文章</option>
+          <option value="video">视频</option>
+          <option value="event">活动</option>
+          <option value="case">项目案例</option>
+          <option value="other">其他</option>
+        </select>
+        <label>作品链接，可选</label>
+        <input class="work-url" placeholder="https://..." />
+        <label>作品素材</label>
+        <textarea class="work-desc" placeholder="不用想格式：这个作品是什么、你做了什么、有什么结果，先随便写。"></textarea>
+        <details>
+          <summary>补充证据，可选</summary>
+          <label>项目背景</label>
+          <textarea class="work-background" placeholder="为什么做这个作品？"></textarea>
+          <label>你的角色</label>
+          <textarea class="work-role" placeholder="你负责什么？"></textarea>
+          <label>结果与反馈</label>
+          <textarea class="work-result" placeholder="数据、反馈、上线结果或学习成果。"></textarea>
+          <label>证明材料</label>
+          <textarea class="work-proof" placeholder="截图、用户评价、复盘文章或演示视频。"></textarea>
+        </details>
+      `;
+      div.querySelector('.work-title').value = data.title || '';
+      div.querySelector('.work-type').value = data.type || 'product';
+      div.querySelector('.work-url').value = data.url || '';
+      div.querySelector('.work-desc').value = data.desc || '';
+      div.querySelector('.work-background').value = data.background || '';
+      div.querySelector('.work-role').value = data.role || '';
+      div.querySelector('.work-result').value = data.result || '';
+      div.querySelector('.work-proof').value = data.proof || '';
+      container.appendChild(div);
+    }
+
+    function getWorks() {
+      return [...document.querySelectorAll('[data-work="true"]')].map(el => ({
+        title: el.querySelector('.work-title').value.trim(),
+        type: el.querySelector('.work-type').value,
+        url: el.querySelector('.work-url').value.trim(),
+        desc: el.querySelector('.work-desc').value.trim(),
+        background: el.querySelector('.work-background').value.trim(),
+        role: el.querySelector('.work-role').value.trim(),
+        result: el.querySelector('.work-result').value.trim(),
+        proof: el.querySelector('.work-proof').value.trim()
+      })).filter(w => w.title || w.url || w.desc || w.background || w.role || w.result || w.proof);
+    }
+
+    function inferSummary(work) {
+      const source = [work.desc, work.background, work.result].filter(Boolean).join(' ');
+      if (source.length > 18) return source.slice(0, 68) + (source.length > 68 ? '...' : '');
+      return '用于展示具体实践、问题解决和执行能力。';
+    }
+
+    function scoreWorks(works) {
+      let score = 40;
+      works.forEach(w => {
+        const text = [w.desc, w.background, w.role, w.result, w.proof].join(' ');
+        if (w.desc.length > 18) score += 8;
+        if (w.url) score += 5;
+        if (w.background) score += 3;
+        if (w.role) score += 3;
+        if (w.result.length > 12) score += 7;
+        if (w.proof || /截图|评价|反馈|链接|视频|数据|看板|证明|推荐|复盘/.test(text)) score += 5;
+        if (/用户|访问|收入|报名|增长|数据|反馈|转化|播放|阅读|成交|GMV|UV|PV|下载|客户|提升|降低|节省|完成|上线|\d/.test(text)) score += 6;
+      });
+      return Math.min(95, score);
+    }
+
+    function tipsFor(works) {
+      const tips = [];
+      if (works.some(w => !w.desc && !w.background)) tips.push('有些作品还只有标题，补几句素材后会更容易看出你的能力。');
+      if (works.some(w => !w.url && !w.proof)) tips.push('部分作品缺少可验证材料，建议补链接、截图、视频或用户反馈。');
+      if (!works.some(w => /用户|访问|收入|报名|增长|数据|反馈|转化|播放|阅读|成交|GMV|UV|PV|下载|客户|提升|降低|节省|完成|上线|\d/.test([w.desc, w.result].join(' ')))) tips.push('如果有结果数据，建议补一个数字，例如访问量、用户反馈、报名数或上线结果。');
+      if (works.length < 3) tips.push('建议整理 3-5 个代表作品，让能力画像更完整。');
+      if (!tips.length) tips.push('当前信息已经适合对外分享，后续可继续补充截图和第三方反馈。');
+      return tips;
+    }
+
+    function generatePortfolio(options = {}) {
+      const shouldShowToast = options.showToast !== false;
+      const shouldUpdateUrl = options.updateUrl !== false;
+      const name = document.getElementById('name').value.trim() || '未命名创作者';
+      const identity = document.getElementById('identity').value;
+      const purpose = document.getElementById('purpose').value;
+      const bio = document.getElementById('bio').value.trim() || '我正在持续积累项目、内容与产品实践，希望把做过的事情转化为可验证的能力证明。';
+      const contact = document.getElementById('contact').value.trim() || '请补充联系方式';
+      const works = getWorks();
+      if (!works.length) {
+        showToast('请至少添加 1 个作品');
+        return;
+      }
+
+      const allSkills = [...new Set(works.flatMap(w => skillMap[w.type] || skillMap.other))].slice(0, 9);
+      const p = purposeMap[purpose] || purposeMap.job;
+      const grouped = works.reduce((acc, work) => {
+        const key = typeMap[work.type] ? work.type : 'other';
+        if (!acc[key]) acc[key] = [];
+        acc[key].push(work);
+        return acc;
+      }, {});
+
+      const sections = Object.entries(grouped).map(([type, items]) => {
+        const config = typeMap[type] || typeMap.other;
+        const cards = items.map(work => {
+          const safeLink = normalizeURL(work.url);
+          const inner = `
+            <div class="gp-item-icon" style="background:${config.color}">${escapeHTML(config.icon)}</div>
+            <div class="gp-item-content">
+              <div class="gp-item-name">${escapeHTML(work.title || '未命名作品')}</div>
+              <div class="gp-item-desc">${escapeHTML(inferSummary(work))}</div>
+              ${safeLink ? '<div class="link-tag">查看作品</div>' : ''}
+            </div>
+            ${safeLink ? '<div class="arrow">›</div>' : ''}
+          `;
+          return safeLink
+            ? `<a class="gp-item" href="${escapeHTML(safeLink.href)}" target="_blank" rel="noopener noreferrer">${inner}</a>`
+            : `<div class="gp-item">${inner}</div>`;
+        }).join('');
+
+        return `
+          <section class="gp-section">
+            <div class="gp-section-head">
+              <div class="gp-section-icon" style="background:${config.bg};color:${config.color}">${escapeHTML(config.icon)}</div>
+              <div class="gp-section-title">${escapeHTML(config.title)}</div>
+            </div>
+            <div class="gp-items">${cards}</div>
+          </section>
+        `;
+      }).join('');
+
+      const score = scoreWorks(works);
+      const tips = tipsFor(works);
+      const draft = collectDraft();
+      currentShareUrl = buildShareUrl(draft);
+      currentShareCopy = `我是${name}，${identity}。这是我的作品名片，整理了${works.length}个代表作品和它们证明的能力。${p.cta}。`;
+
+      document.getElementById('preview').innerHTML = `
+        <div class="generated-page" id="card">
+          <header class="gp-hero">
+            <div class="gp-avatar">${escapeHTML(name[0] || '作')}</div>
+            <div class="gp-content">
+              <div class="gp-name">${escapeHTML(name)}</div>
+              <div class="gp-identity">${escapeHTML(identity)} · ${escapeHTML(p.title)}</div>
+              <div class="gp-bio">${escapeHTML(bio)}</div>
+              <div class="tags">${allSkills.map(s => `<span class="tag">${escapeHTML(s)}</span>`).join('')}</div>
+              <div class="contact">联系：${escapeHTML(contact)}</div>
+            </div>
+          </header>
+          ${sections}
+          <div class="score-card">
+            <div class="score-title">能力证明完整度：${score}/100</div>
+            ${tips.map(t => `<div class="tip">• ${escapeHTML(t)}</div>`).join('')}
+          </div>
+          <div class="cta-card">
+            <div class="cta-title">想进一步了解？</div>
+            <div class="cta-desc">${escapeHTML(p.cta)}：${escapeHTML(contact)}</div>
+            <button class="primary-btn" type="button" data-copy-share>复制分享文案</button>
+            <button class="secondary-btn" type="button" data-copy-link>复制访问链接</button>
+            <div class="share-panel" id="sharePanel">
+              <strong>扫码查看这张名片</strong>
+              <div class="qr-box"><img id="qrImage" alt="页面二维码" /></div>
+              <div class="share-url" id="shareUrl"></div>
+            </div>
+          </div>
+          <div class="footer">由作品名片生成 · 把经历转化为可信能力证明</div>
+        </div>
+      `;
+      saveDraft(false);
+      if (shouldUpdateUrl && currentShareUrl) {
+        history.replaceState(null, '', currentShareUrl);
+      }
+      if (shouldShowToast) showToast('已生成作品名片');
+    }
+
+    function collectDraft() {
+      return {
+        name: document.getElementById('name').value,
+        identity: document.getElementById('identity').value,
+        purpose: document.getElementById('purpose').value,
+        bio: document.getElementById('bio').value,
+        contact: document.getElementById('contact').value,
+        works: getWorks()
+      };
+    }
+
+    function applyDraft(draft) {
+      if (!draft) return;
+      document.getElementById('name').value = draft.name || '';
+      document.getElementById('identity').value = draft.identity || 'AI 产品经理';
+      document.getElementById('purpose').value = draft.purpose || 'job';
+      document.getElementById('bio').value = draft.bio || '';
+      document.getElementById('contact').value = draft.contact || '';
+      document.getElementById('worksInput').innerHTML = '';
+      workCount = 0;
+      (draft.works && draft.works.length ? draft.works : [{}]).forEach(addWork);
+    }
+
+    function saveDraft(showMessage) {
+      localStorage.setItem(storageKey, JSON.stringify(collectDraft()));
+      if (showMessage !== false) showToast('草稿已保存');
+    }
+
+    function loadDraft() {
+      const raw = localStorage.getItem(storageKey);
+      if (!raw) {
+        showToast('暂无可恢复草稿');
+        return;
+      }
+      applyDraft(JSON.parse(raw));
+      showToast('草稿已恢复');
+    }
+
+    function copyText(text, successMessage) {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(() => showToast(successMessage));
+        return;
+      }
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.setAttribute('readonly', '');
+      textarea.style.position = 'fixed';
+      textarea.style.left = '-9999px';
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      textarea.remove();
+      showToast(successMessage);
+    }
+
+    function copyShare() {
+      if (!currentShareCopy || !currentShareUrl) {
+        showToast('请先生成作品名片');
+        return;
+      }
+      copyText(`${currentShareCopy}\n${currentShareUrl}`, '已复制分享文案');
+    }
+
+    function copyShareUrl() {
+      if (!currentShareUrl) {
+        showToast('请先生成作品名片');
+        return;
+      }
+      copyText(currentShareUrl, '已复制访问链接');
+    }
+
+    function makeQrUrl(url) {
+      return `https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=12&data=${encodeURIComponent(url)}`;
+    }
+
+    function toggleSharePanel() {
+      const panel = document.getElementById('sharePanel');
+      const qr = document.getElementById('qrImage');
+      const shareUrl = document.getElementById('shareUrl');
+      if (!panel || !qr || !shareUrl) {
+        showToast('请先生成作品名片');
+        return;
+      }
+      const url = currentShareUrl;
+      qr.src = makeQrUrl(url);
+      shareUrl.textContent = url;
+      panel.classList.toggle('is-open');
+    }
+
+    function fillDemo() {
+      document.getElementById('name').value = 'AS Lee';
+      document.getElementById('identity').value = 'AI 产品与增长实践者';
+      document.getElementById('purpose').value = 'collab';
+      document.getElementById('bio').value = '我关注 AI 产品、增长和个人品牌建设，擅长用低成本工具快速验证产品想法，并通过内容和社群获得早期反馈。';
+      document.getElementById('contact').value = '微信：your-wechat / 邮箱：hello@example.com';
+      document.getElementById('worksInput').innerHTML = '';
+      workCount = 0;
+      addWork({
+        title: 'AI 作品名片生成器',
+        type: 'product',
+        url: 'https://example.com',
+        desc: '做了一个帮助 AI 转型者和独立创作者整理作品的工具，用户粘贴经历后可以生成个人定位、作品卡片、能力标签和完整度建议。',
+        background: 'AI 转型者和独立创作者有很多零散经历，但缺少一个能说明能力的展示页。',
+        role: '独立负责产品定义、页面原型、规则生成逻辑和早期演示。',
+        result: '完成可演示版本，支持作品生成、草稿保存和分享文案复制。'
+      });
+      addWork({
+        title: 'AI 时代增长方法论文章',
+        type: 'article',
+        desc: '写了一篇关于 AI 时代增长方法的文章，分析普通人如何用内容、社群和自动化工具做低成本验证。',
+        result: '形成一篇可用于个人品牌展示的观点型文章。'
+      });
+      addWork({
+        title: 'AI 时代如何做需求优先级',
+        type: 'video',
+        url: 'https://www.bilibili.com/video/example',
+        desc: '围绕 AI 产品早期验证，录制了一期需求优先级判断方法的视频内容。',
+        result: '可作为产品思维和内容表达能力的展示材料。'
+      });
+      generatePortfolio();
+    }
+
+    document.getElementById('addWorkBtn').addEventListener('click', () => addWork());
+    document.getElementById('generateBtn').addEventListener('click', generatePortfolio);
+    document.getElementById('saveDraftBtn').addEventListener('click', () => saveDraft(true));
+    document.getElementById('loadDraftBtn').addEventListener('click', loadDraft);
+    document.getElementById('demoBtn').addEventListener('click', fillDemo);
+    document.getElementById('shareBtn').addEventListener('click', toggleSharePanel);
+    document.getElementById('preview').addEventListener('click', event => {
+      if (event.target.closest('[data-copy-share]')) copyShare();
+      if (event.target.closest('[data-copy-link]')) copyShareUrl();
+    });
+    document.getElementById('worksInput').addEventListener('click', event => {
+      if (!event.target.classList.contains('remove-btn')) return;
+      const work = event.target.closest('[data-work="true"]');
+      if (work) work.remove();
+      if (!document.querySelector('[data-work="true"]')) addWork();
+    });
+
+    const sharedDraft = getSharedDraft();
+    if (sharedDraft) {
+      applyDraft(sharedDraft);
+      generatePortfolio({ showToast: false, updateUrl: false });
+    } else {
+      addWork();
+    }
+  </script>
+</body>
+</html>
