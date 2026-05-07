@@ -1,0 +1,13 @@
+{
+  "name": "zuoppinmingpian",
+  "version": "0.2.0",
+  "private": true,
+  "description": "作品名片 H5 与微信小程序版本",
+  "scripts": {
+    "start": "node server/server.js",
+    "dev": "node server/server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

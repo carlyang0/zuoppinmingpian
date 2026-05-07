@@ -2,3 +2,5 @@ project.private.config.json
 upload-info.json
 preview-info.json
 preview-qrcode.png
+server/data/*.json
+server/data/*.tmp

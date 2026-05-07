@@ -584,6 +584,40 @@
       z-index: 10;
     }
 
+    .viewer-mode .hero,
+    .viewer-mode #editor,
+    .viewer-mode .preview-kicker {
+      display: none;
+    }
+
+    .viewer-mode .layout {
+      display: block;
+    }
+
+    .viewer-mode .preview-shell {
+      position: static;
+      padding: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .viewer-mode .preview {
+      max-height: none;
+      padding: 0;
+      background: transparent;
+      overflow: visible;
+    }
+
+    .viewer-mode #demoBtn {
+      display: none;
+    }
+
+    .viewer-mode .header-actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      width: 100%;
+    }
+
     @media (max-width: 820px) {
       .page {
         padding-left: 12px;
@@ -716,7 +750,8 @@
         <div id="worksInput"></div>
 
         <div class="actions">
-          <button class="primary-btn" id="generateBtn" type="button">生成作品名片</button>
+          <button class="primary-btn" id="publishBtn" type="button">发布并生成链接</button>
+          <button class="secondary-btn" id="generateBtn" type="button">生成预览</button>
           <button class="secondary-btn" id="addWorkBtn" type="button">添加作品</button>
           <button class="ghost-btn" id="saveDraftBtn" type="button">保存草稿</button>
           <button class="ghost-btn" id="loadDraftBtn" type="button">恢复草稿</button>
@@ -744,6 +779,8 @@
     let workCount = 0;
     let currentShareCopy = '';
     let currentShareUrl = '';
+    let currentCardId = '';
+    let currentEditToken = '';
 
     const skillMap = {
       product: ['AI 产品设计', 'MVP 验证', '用户场景拆解'],
@@ -824,8 +861,32 @@
 
     function buildShareUrl(draft) {
       const url = new URL(location.href);
+      url.search = '';
       url.hash = `card=${encodeURIComponent(encodePayload(draft))}`;
       return url.toString();
+    }
+
+    function getCardIdFromUrl() {
+      const params = new URLSearchParams(location.search);
+      const queryId = params.get('id');
+      if (queryId) return queryId;
+      const pathMatch = location.pathname.match(/\/c\/([a-zA-Z0-9_-]+)/);
+      return pathMatch ? pathMatch[1] : '';
+    }
+
+    function toAbsoluteUrl(path) {
+      if (/^https?:\/\//i.test(path)) return path;
+      return new URL(path, location.href).toString();
+    }
+
+    function buildCardUrl(id) {
+      if (!id || location.origin === 'null') return '';
+      return new URL(`/c/${encodeURIComponent(id)}`, location.origin).toString();
+    }
+
+    function setViewerMode(enabled) {
+      document.body.classList.toggle('viewer-mode', Boolean(enabled));
+      document.getElementById('shareBtn').textContent = enabled ? '分享' : '二维码';
     }
 
     function addWork(data = {}) {
@@ -976,7 +1037,7 @@
       const score = scoreWorks(works);
       const tips = tipsFor(works);
       const draft = collectDraft();
-      currentShareUrl = buildShareUrl(draft);
+      currentShareUrl = options.shareUrl || currentShareUrl || buildShareUrl(draft);
       currentShareCopy = `我是${name}，${identity}。这是我的作品名片，整理了${works.length}个代表作品和它们证明的能力。${p.cta}。`;
 
       document.getElementById('preview').innerHTML = `
@@ -1011,7 +1072,7 @@
         </div>
       `;
       saveDraft(false);
-      if (shouldUpdateUrl && currentShareUrl) {
+      if (shouldUpdateUrl && currentShareUrl && !currentCardId) {
         history.replaceState(null, '', currentShareUrl);
       }
       if (shouldShowToast) showToast('已生成作品名片');
@@ -1088,6 +1149,61 @@
       copyText(currentShareUrl, '已复制访问链接');
     }
 
+    function openSharePanel() {
+      const panel = document.getElementById('sharePanel');
+      const qr = document.getElementById('qrImage');
+      const shareUrl = document.getElementById('shareUrl');
+      if (!panel || !qr || !shareUrl || !currentShareUrl) return;
+      qr.src = makeQrUrl(currentShareUrl);
+      shareUrl.textContent = currentShareUrl;
+      panel.classList.add('is-open');
+    }
+
+    async function publishCard() {
+      currentShareUrl = '';
+      generatePortfolio({ showToast: false, updateUrl: false });
+      const draft = collectDraft();
+      if (!draft.works.length) {
+        showToast('请至少添加 1 个作品');
+        return;
+      }
+
+      if (location.protocol === 'file:') {
+        currentShareUrl = buildShareUrl(draft);
+        history.replaceState(null, '', currentShareUrl);
+        generatePortfolio({ showToast: false, updateUrl: false, shareUrl: currentShareUrl });
+        openSharePanel();
+        showToast('本地预览已生成长链接');
+        return;
+      }
+
+      try {
+        const updating = currentCardId && currentEditToken;
+        const response = await fetch(updating ? `/api/cards/${encodeURIComponent(currentCardId)}` : '/api/cards', {
+          method: updating ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updating ? { card: draft, editToken: currentEditToken } : { card: draft })
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || '发布失败');
+
+        currentCardId = result.id;
+        currentEditToken = result.editToken || currentEditToken;
+        if (currentEditToken) {
+          localStorage.setItem(`portfolioEditToken:${currentCardId}`, currentEditToken);
+        }
+        currentShareUrl = toAbsoluteUrl(result.url || buildCardUrl(currentCardId));
+        generatePortfolio({ showToast: false, updateUrl: false, shareUrl: currentShareUrl });
+        openSharePanel();
+        showToast(updating ? '已更新作品名片' : '已发布作品名片');
+      } catch (error) {
+        currentShareUrl = buildShareUrl(draft);
+        generatePortfolio({ showToast: false, updateUrl: false, shareUrl: currentShareUrl });
+        openSharePanel();
+        showToast('后端未连接，已生成本地长链接');
+      }
+    }
+
     function makeQrUrl(url) {
       return `https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=12&data=${encodeURIComponent(url)}`;
     }
@@ -1096,7 +1212,7 @@
       const panel = document.getElementById('sharePanel');
       const qr = document.getElementById('qrImage');
       const shareUrl = document.getElementById('shareUrl');
-      if (!panel || !qr || !shareUrl) {
+      if (!panel || !qr || !shareUrl || !currentShareUrl) {
         showToast('请先生成作品名片');
         return;
       }
@@ -1104,6 +1220,59 @@
       qr.src = makeQrUrl(url);
       shareUrl.textContent = url;
       panel.classList.toggle('is-open');
+    }
+
+    async function loadCardById(id) {
+      setViewerMode(true);
+      document.getElementById('preview').innerHTML = `
+        <div class="empty">
+          <div>
+            <h2>正在打开作品名片</h2>
+            <p>如果长时间没有响应，请检查链接是否正确。</p>
+          </div>
+        </div>
+      `;
+      const response = await fetch(`/api/cards/${encodeURIComponent(id)}`);
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || '名片不存在');
+
+      currentCardId = result.id;
+      currentEditToken = localStorage.getItem(`portfolioEditToken:${currentCardId}`) || '';
+      currentShareUrl = toAbsoluteUrl(result.url || buildCardUrl(currentCardId));
+      applyDraft(result.card);
+      generatePortfolio({ showToast: false, updateUrl: false, shareUrl: currentShareUrl });
+    }
+
+    async function initPage() {
+      const cardId = getCardIdFromUrl();
+      if (cardId) {
+        try {
+          await loadCardById(cardId);
+        } catch (error) {
+          setViewerMode(true);
+          document.getElementById('preview').innerHTML = `
+            <div class="empty">
+              <div>
+                <h2>没有找到这张作品名片</h2>
+                <p>可能是链接失效，或者当前后端服务没有启动。</p>
+              </div>
+            </div>
+          `;
+          showToast(error.message || '加载失败');
+        }
+        return;
+      }
+
+      const sharedDraft = getSharedDraft();
+      if (sharedDraft) {
+        setViewerMode(true);
+        applyDraft(sharedDraft);
+        currentShareUrl = location.href;
+        generatePortfolio({ showToast: false, updateUrl: false, shareUrl: currentShareUrl });
+      } else {
+        setViewerMode(false);
+        addWork();
+      }
     }
 
     function fillDemo() {
@@ -1141,6 +1310,7 @@
 
     document.getElementById('addWorkBtn').addEventListener('click', () => addWork());
     document.getElementById('generateBtn').addEventListener('click', generatePortfolio);
+    document.getElementById('publishBtn').addEventListener('click', publishCard);
     document.getElementById('saveDraftBtn').addEventListener('click', () => saveDraft(true));
     document.getElementById('loadDraftBtn').addEventListener('click', loadDraft);
     document.getElementById('demoBtn').addEventListener('click', fillDemo);
@@ -1156,13 +1326,7 @@
       if (!document.querySelector('[data-work="true"]')) addWork();
     });
 
-    const sharedDraft = getSharedDraft();
-    if (sharedDraft) {
-      applyDraft(sharedDraft);
-      generatePortfolio({ showToast: false, updateUrl: false });
-    } else {
-      addWork();
-    }
+    initPage();
   </script>
 </body>
 </html>
