@@ -7,6 +7,8 @@
 - `index.html`: Web 预览版
 - `h5/`: 面向国内手机用户的 H5 发布版，支持发布短链接和二维码访问
 - `server/`: H5 后端服务，保存作品名片并生成 `/c/短ID` 访问链接
+- `deploy/`: Nginx 反向代理示例
+- `docs/tencent-cloud-deploy.md`: 腾讯云部署建议
 - `miniprogram/`: 微信小程序版
 
 ## 小程序预览
@@ -16,6 +18,7 @@
 ## H5 本地预览
 
 ```bash
+npm install
 npm start
 ```
 
@@ -29,4 +32,4 @@ npm start
 
 ## H5 部署
 
-第二阶段 H5 需要后端保存数据，不能只把 `h5/index.html` 扔到静态托管。建议部署到国内云服务器、腾讯云 CloudBase 或可运行 Node.js 的服务，并为域名配置 HTTPS。
+第二阶段 H5 需要后端保存数据，不能只把 `h5/index.html` 扔到静态托管。建议部署到腾讯云轻量应用服务器或 CVM，使用 Docker Compose 运行 Node.js 服务，再通过 Nginx 配置 HTTPS 和反向代理。详细步骤见 `docs/tencent-cloud-deploy.md`。

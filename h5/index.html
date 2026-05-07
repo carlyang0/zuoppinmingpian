@@ -46,6 +46,11 @@
       cursor: pointer;
     }
 
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.58;
+    }
+
     a {
       color: inherit;
       text-decoration: none;
@@ -279,6 +284,12 @@
 
     .actions .secondary-btn, .actions .ghost-btn {
       flex: 1 1 calc(50% - 8px);
+    }
+
+    .privacy-note {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 12px;
     }
 
     .preview {
@@ -756,6 +767,7 @@
           <button class="ghost-btn" id="saveDraftBtn" type="button">保存草稿</button>
           <button class="ghost-btn" id="loadDraftBtn" type="button">恢复草稿</button>
         </div>
+        <p class="privacy-note">发布后，任何拿到链接的人都能查看你的作品名片。请不要填写身份证号、住址、手机号等敏感信息。</p>
       </form>
 
       <section class="preview-shell">
@@ -781,6 +793,7 @@
     let currentShareUrl = '';
     let currentCardId = '';
     let currentEditToken = '';
+    let isPublishing = false;
 
     const skillMap = {
       product: ['AI 产品设计', 'MVP 验证', '用户场景拆解'],
@@ -985,6 +998,7 @@
     function generatePortfolio(options = {}) {
       const shouldShowToast = options.showToast !== false;
       const shouldUpdateUrl = options.updateUrl !== false;
+      const shouldSaveDraft = options.saveDraft !== false && !document.body.classList.contains('viewer-mode');
       const name = document.getElementById('name').value.trim() || '未命名创作者';
       const identity = document.getElementById('identity').value;
       const purpose = document.getElementById('purpose').value;
@@ -1071,7 +1085,7 @@
           <div class="footer">由作品名片生成 · 把经历转化为可信能力证明</div>
         </div>
       `;
-      saveDraft(false);
+      if (shouldSaveDraft) saveDraft(false);
       if (shouldUpdateUrl && currentShareUrl && !currentCardId) {
         history.replaceState(null, '', currentShareUrl);
       }
@@ -1160,6 +1174,7 @@
     }
 
     async function publishCard() {
+      if (isPublishing) return;
       currentShareUrl = '';
       generatePortfolio({ showToast: false, updateUrl: false });
       const draft = collectDraft();
@@ -1176,6 +1191,12 @@
         showToast('本地预览已生成长链接');
         return;
       }
+
+      const publishBtn = document.getElementById('publishBtn');
+      isPublishing = true;
+      publishBtn.disabled = true;
+      const originalText = publishBtn.textContent;
+      publishBtn.textContent = currentCardId && currentEditToken ? '正在更新...' : '正在发布...';
 
       try {
         const updating = currentCardId && currentEditToken;
@@ -1197,15 +1218,19 @@
         openSharePanel();
         showToast(updating ? '已更新作品名片' : '已发布作品名片');
       } catch (error) {
-        currentShareUrl = buildShareUrl(draft);
-        generatePortfolio({ showToast: false, updateUrl: false, shareUrl: currentShareUrl });
-        openSharePanel();
-        showToast('后端未连接，已生成本地长链接');
+        showToast(error.message || '发布失败，请检查服务是否正常');
+      } finally {
+        isPublishing = false;
+        publishBtn.disabled = false;
+        publishBtn.textContent = originalText;
       }
     }
 
     function makeQrUrl(url) {
-      return `https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=12&data=${encodeURIComponent(url)}`;
+      if (location.protocol === 'file:') {
+        return `https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=12&data=${encodeURIComponent(url)}`;
+      }
+      return `/api/qr.svg?data=${encodeURIComponent(url)}`;
     }
 
     function toggleSharePanel() {
@@ -1240,7 +1265,7 @@
       currentEditToken = localStorage.getItem(`portfolioEditToken:${currentCardId}`) || '';
       currentShareUrl = toAbsoluteUrl(result.url || buildCardUrl(currentCardId));
       applyDraft(result.card);
-      generatePortfolio({ showToast: false, updateUrl: false, shareUrl: currentShareUrl });
+      generatePortfolio({ showToast: false, updateUrl: false, saveDraft: false, shareUrl: currentShareUrl });
     }
 
     async function initPage() {
@@ -1268,7 +1293,7 @@
         setViewerMode(true);
         applyDraft(sharedDraft);
         currentShareUrl = location.href;
-        generatePortfolio({ showToast: false, updateUrl: false, shareUrl: currentShareUrl });
+        generatePortfolio({ showToast: false, updateUrl: false, saveDraft: false, shareUrl: currentShareUrl });
       } else {
         setViewerMode(false);
         addWork();

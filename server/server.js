@@ -3,13 +3,27 @@ const fs = require('node:fs/promises');
 const fsSync = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
+const QRCode = require('qrcode');
 
 const rootDir = path.resolve(__dirname, '..');
-const dataDir = path.join(__dirname, 'data');
+const publicDir = path.join(rootDir, 'h5');
+const dataDir = path.resolve(process.env.DATA_DIR || path.join(__dirname, 'data'));
 const dbPath = path.join(dataDir, 'cards.json');
 const port = Number(process.env.PORT || 8787);
 const host = process.env.HOST || '0.0.0.0';
 const maxBodyBytes = 96 * 1024;
+const baseUrl = process.env.BASE_URL ? process.env.BASE_URL.replace(/\/+$/, '') : '';
+const mutationWindowMs = 60 * 1000;
+const maxMutationsPerWindow = 20;
+const mutationBuckets = new Map();
+
+const securityHeaders = {
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+  'Content-Security-Policy': "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+};
 
 const mimeTypes = {
   '.html': 'text/html; charset=utf-8',
@@ -53,6 +67,7 @@ async function writeDb(db) {
 function json(res, status, payload) {
   const body = JSON.stringify(payload);
   res.writeHead(status, {
+    ...securityHeaders,
     'Content-Type': 'application/json; charset=utf-8',
     'Cache-Control': 'no-store',
     'Content-Length': Buffer.byteLength(body)
@@ -62,6 +77,7 @@ function json(res, status, payload) {
 
 function redirect(res, location) {
   res.writeHead(302, {
+    ...securityHeaders,
     Location: location,
     'Cache-Control': 'no-store'
   });
@@ -92,9 +108,38 @@ function publicCard(record, req) {
 }
 
 function originOf(req) {
+  if (baseUrl) return baseUrl;
   const proto = req.headers['x-forwarded-proto'] || 'http';
   const hostName = req.headers['x-forwarded-host'] || req.headers.host || `localhost:${port}`;
   return `${proto}://${hostName}`;
+}
+
+function clientIp(req) {
+  const forwarded = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
+  return forwarded || req.socket.remoteAddress || 'unknown';
+}
+
+function checkMutationRate(req) {
+  const ip = clientIp(req);
+  const now = Date.now();
+  const current = mutationBuckets.get(ip) || { count: 0, resetAt: now + mutationWindowMs };
+  if (now > current.resetAt) {
+    current.count = 0;
+    current.resetAt = now + mutationWindowMs;
+  }
+  current.count += 1;
+  mutationBuckets.set(ip, current);
+  return current.count <= maxMutationsPerWindow;
+}
+
+function writeText(res, status, body, contentType = 'text/plain; charset=utf-8', cacheControl = 'no-store') {
+  res.writeHead(status, {
+    ...securityHeaders,
+    'Content-Type': contentType,
+    'Cache-Control': cacheControl,
+    'Content-Length': Buffer.byteLength(body)
+  });
+  res.end(body);
 }
 
 function sanitizeText(value, max = 1200) {
@@ -171,7 +216,27 @@ async function handleApi(req, res, url) {
     return true;
   }
 
+  if (url.pathname === '/api/qr.svg' && req.method === 'GET') {
+    const data = String(url.searchParams.get('data') || '').trim();
+    if (!data || data.length > 2400) {
+      json(res, 400, { error: '二维码内容为空或过长' });
+      return true;
+    }
+    const svg = await QRCode.toString(data, {
+      type: 'svg',
+      width: 240,
+      margin: 2,
+      errorCorrectionLevel: 'M'
+    });
+    writeText(res, 200, svg, 'image/svg+xml; charset=utf-8', 'public, max-age=300');
+    return true;
+  }
+
   if (url.pathname === '/api/cards' && req.method === 'POST') {
+    if (!checkMutationRate(req)) {
+      json(res, 429, { error: '发布太频繁，请稍后再试' });
+      return true;
+    }
     try {
       const body = await readBody(req);
       const card = sanitizeCard(body.card);
@@ -216,6 +281,10 @@ async function handleApi(req, res, url) {
   }
 
   if (cardMatch && req.method === 'PUT') {
+    if (!checkMutationRate(req)) {
+      json(res, 429, { error: '更新太频繁，请稍后再试' });
+      return true;
+    }
     try {
       const id = cardMatch[1];
       const body = await readBody(req);
@@ -255,12 +324,19 @@ async function serveStatic(req, res, url) {
     redirect(res, `/h5/index.html?id=${encodeURIComponent(cardMatch[1])}`);
     return;
   }
+  if (pathname === '/h5') {
+    redirect(res, '/h5/index.html');
+    return;
+  }
+  if (!pathname.startsWith('/h5/')) {
+    writeText(res, 404, 'Not found');
+    return;
+  }
 
-  const safePath = path.normalize(pathname).replace(/^(\.\.[/\\])+/, '');
-  const filePath = path.join(rootDir, safePath);
-  if (!filePath.startsWith(rootDir)) {
-    res.writeHead(403);
-    res.end('Forbidden');
+  const relativePath = pathname.slice('/h5/'.length) || 'index.html';
+  const filePath = path.resolve(publicDir, relativePath);
+  if (!filePath.startsWith(`${publicDir}${path.sep}`) && filePath !== publicDir) {
+    writeText(res, 403, 'Forbidden');
     return;
   }
 
@@ -272,13 +348,13 @@ async function serveStatic(req, res, url) {
     }
     const ext = path.extname(filePath).toLowerCase();
     res.writeHead(200, {
+      ...securityHeaders,
       'Content-Type': mimeTypes[ext] || 'application/octet-stream',
       'Cache-Control': ext === '.html' ? 'no-store' : 'public, max-age=3600'
     });
     fsSync.createReadStream(filePath).pipe(res);
   } catch (error) {
-    res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
-    res.end('Not found');
+    writeText(res, 404, 'Not found');
   }
 }
 
